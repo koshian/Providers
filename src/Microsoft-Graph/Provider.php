@@ -97,12 +97,17 @@ class Provider extends AbstractProvider
      */
     protected function mapUserToObject(array $user)
     {
+        // mail field is always null without Exchange online.
+        // Use userPrincipalName(UPN) instead of mail.
+        $mail = isset($user['mail']) ? $user['mail']
+                                     : Arr::get($user, 'userPrincipalName');
+
         // Mapping default Laravel user keys to the keys that are nested in the
         // response from the provider.
         return (new User())->setRaw($user)->map([
             'id' => $user['id'],
             'name' => $user['displayName'],
-            'email' => $user['mail'],
+            'email' => $mail,
 
             // The following values are not always required by the provider. We
             // cannot guarantee they will exist in the $user array.
